@@ -1,0 +1,175 @@
+
+<!doctype html>
+<html lang="en">
+{% load leaflet_tags %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Geo Location</title>
+    {% leaflet_js %}
+    {% leaflet_css %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <style>
+        #mapIndia1 { 
+            margin: auto;
+            height: 90vh; 
+            width: 730px;
+        }
+    </style>
+</head>
+
+<body>
+    
+    <div class="container">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">GeoLocation</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Home</a>
+                        </li>
+                        
+                    </ul>
+                    <form class="d-flex" role="search">
+                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-success" type="submit">Search</button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+        <!--End Navbar -->
+        <h1>GeoLocation Data</h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Cuntory</th>
+                    <th scope="col">Area</th>
+                    <th scope="col">longitude</th>
+                    <th scope="col">latitude</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {%for i in qs %}
+                        <th>{{i.name}}</th>
+                        <td>{{i.area}}</td>
+                        <td>{{i.lon}}</td>
+                        <td>{{i.lat}}</td>
+                    {%endfor%}
+                </tr>
+        
+            </tbody>
+        </table>
+        <h1>Weather Report</h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Day</th>
+                    <th scope="col">Temperature</th>
+                    <th scope="col">Icon</th>
+                    <th scope="col">Forecast</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    {%for i in periods1%}
+                    <tr>
+                        <th>{{i.name}}</th>
+                        <td>{{i.temperature}}'{{i.temperatureUnit}}</td>
+                        <td><img class ="rounded float-start"src="{{i.icon}}" alt="icon"></td>
+                        <td>{{i.shortForecast}}</td>
+                    </tr>
+                        
+                    {%endfor%}
+                
+                
+            </tbody>
+        </table>
+        
+        <!-- {%for i in periods1%}
+        <p>Day:{{i.name}}</p>
+        <p>Temperature:{{i.temperature}}'{{i.temperatureUnit}}</p>
+        <img src="{{i.icon}}" alt="icon">
+        <p>Forecast:{{i.shortForecast}}</p>
+        {%endfor%} -->
+
+    </div>
+    <div id="mapIndia1">
+    </div>
+    <script>
+        var india_geo = [{
+            "type": "Feature",
+            "properties": {
+                "Zone": 2,
+                "ST_NM": "Andaman & Nicobar Island"
+            },
+            "geometry": {
+                "type": "MultiPolygon",
+                "coordinates": [[[
+                    [93.84861388352397, 7.240511941073294],
+                    [93.73864250664644, 7.190689919704084],
+                    [93.69123542847228, 7.19085093252454],
+                    [93.65621511573505, 7.126739829579492],
+                    [93.67784740013747, 7.016118856200308],
+                    [93.74676860258899, 6.961872622723433]
+                ]]]
+            }
+        }]
+    </script>
+    <script>
+        function getZoneColor(e) {
+            return e > 5 ? '#045a8d' :
+                e > 4 ? '#74a9cf' :
+                    e > 3 ? '#a6bddb' :
+                        e > 2 ? '#d0d1e6' :
+                            e > 1 ? '#4292c6' :
+                                e > 0 ? '#2171b5' :
+                                    '#023858';
+        }
+
+        function style_states1(feature) {
+            return {
+                fillColor: getZoneColor(feature.properties.Zone),
+                weight: 1,
+                opacity: 1,
+                color: 'grey',
+                dashArray: '0',
+                fillOpacity: 1
+            };
+        }
+
+        var map = L.map('mapIndia1').setView([22.805, 82.0], 5);
+        // Blank Layer to get us started
+        var myLayer = L.geoJSON().addTo(map);
+
+        // Add States Layer
+        L.geoJson(india_geo, {
+            style: style_states1,
+            onEachFeature: function (feature, layer) {
+                layer.bindPopup('<h3>State: ' + feature.properties.ST_NM + '</h3>');
+            }
+        }).addTo(map);
+        // Add Google tile layer with attribution
+        L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+        var marker = L.marker([26.8467, 80.9462]).addTo(map);
+        marker.bindPopup('Lucknow')
+        marker.openPopup();
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
+
